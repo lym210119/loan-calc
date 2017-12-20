@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <style>
+    .calc-box {
+      width: 800px;
+      margin: 50px auto;
+      border-radius: 4px;
+      box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
+      background: #fafafa;
+      overflow: hidden;
+      padding: 10px;
+    }
+
+
+
+    .calc-iphone {
+      width: 400px;
+      height: 600px;
+      margin: 100px auto;
+      font: 25px/1 "microsoft yahei", sans-serif;
+      color: black;
+    }
+
+    .outcome-window {
+      width: 100%;
+      height: 27.3%;
+      background-color: #2f4050;
+      position: relative;
+    }
+
+    .outcome-window p {
+      cursor: default;
+      width: 90%;
+      max-width: 90%;
+      text-align: right;
+      font-size: 4.8em;
+      color: #fff;
+      background-color: transparent;
+      /* padding: 5% 5%; */
+      border: none;
+      margin: 0;
+      outline: none;
+      position: absolute;
+      bottom: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="calc-box">
+    <a class="close" href="javascript:;" title="关闭">
+      <i class="fa fa-times-circle"></i>
+    </a>
+    <h2 class="text-center">
+      还款计算器
+    </h2>
+    <!--box_jsq_r end;-->
+
+    <div class="jsb">
+      <form class="form-horizontal">
+
+        <div class="form-group">
+          <label for="" class="col-sm-4 control-label">计算方式</label>
+          <div class="col-sm-8">
+            <label class="i-checks checkbox-inline">
+              <input type="radio" name="calcType" value="1" checked> 等额本息
+            </label>
+            <label class="jsele i-checks checkbox-inline">
+              <input type="radio" name="calcType" value="2"> 等额本金
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="" class="col-sm-4 control-label">贷款本金</label>
+          <div class="col-sm-8">
+            <input type="text" name="loanMoney" class="form-control inline" style="width: 150px">
+            <span>万元</span>
+          </div>
+
+        </div>
+        <div class="form-group">
+          <label for="" class="col-sm-4 control-label">贷款期限</label>
+          <div class="col-sm-8">
+            <input type="text" name="loanTime" class="form-control inline" style="width: 150px">
+            <select name="unit" id="" class="form-control inline" style="width:64px; background:#eee;">
+              <option value="month">月</option>
+              <option value="year">年</option>
+            </select>
+          </div>
+
+        </div>
+        <div class="form-group">
+          <label for="" class="col-sm-4 control-label">年利率</label>
+          <div class="col-sm-8">
+            <input type="text" name="yearRate" class="form-control inline" style="width: 150px">
+            <span>%</span>
+          </div>
+
+        </div>
+        <div class="form-group">
+          <label for="" class="col-sm-4 control-label">月利率</label>
+          <div class="col-sm-8">
+            <input type="text" name="monthRate" class="form-control inline" style="width: 150px">
+            <span>%</span>
+          </div>
+
+        </div>
+
+      </form>
+      <div class="form-group text-center">
+        <button class="btn btn-primary" id="calc-btn">计算</button>
+        <button class="btn btn-default" id="reset-btn">重置</button>
+      </div>
+
+    </div>
+    <div class="jgsc">
+
+      <div class="result">
+        <ul>
+          <li class="benjin">
+            <span>每月还款：</span>
+            <i class="month-repay"></i>
+          </li>
+          <li class="benjin">
+            <span>每年还款：</span>
+            <i class="year-repay"></i>
+          </li>
+          <li>
+            <span>总额：</span>
+            <i class="total"></i>
+          </li>
+          <li>
+            <span>利息：</span>
+            <i class="interest"></i>
+          </li>
+        </ul>
+
+      </div>
+
+      <table class="table table-striped table-bordered table-hover nowrap" width="100%" border="0" cellpadding="0" cellspacing="0">
+        <thead>
+          <tr>
+            <th>月份</th>
+            <th>本月还款</th>
+            <th>本月本金</th>
+            <th>本月利息</th>
+            <th>已还本金</th>
+            <th>已还利息</th>
+            <th>累计还款</th>
+            <th>本金余额</th>
+            <th>总余额</th>
+          </tr>
+        </thead>
+        <tbody id="calc-tbody">
+
+        </tbody>
+
+      </table>
+
+      <div class="jsx">此结果仅供参考，实际应缴费以当地为准</div>
+
+    </div>
+
+
+  </div>
+
+  <script>
+    // 还款计算器
+    $('input[name=yearRate]').on('blur', function () {
+      var yearRate = $(this).val();
+      if (!yearRate || isNaN(yearRate)) {
+        console.log('请输入正确的利率！')
+        return;
+      }
+      $('input[name=monthRate]').val((yearRate / 12).toFixed(6));
+    })
+    $('input[name=monthRate]').on('blur', function () {
+      var yearRate = $(this).val();
+      if (!yearRate || isNaN(yearRate)) {
+        console.log('请输入正确的利率！')
+        return;
+      }
+      $('input[name=yearRate]').val((yearRate * 12).toFixed(6));
+    })
+
+
+
+    $('#calc-btn').on('click', function () {
+
+      var calcType = $('input[name=calcType]:checked').val();
+      var loanMoney = $('input[name=loanMoney]').val() * 10000;
+      var unit = $('select[name=unit]').val();
+      var loanTime = $('input[name=loanTime]').val();
+      var yearRate = $('input[name=yearRate]').val();
+      var monthRate = $('input[name=monthRate]').val() / 100;
+      if (unit === 'year') {
+        loanTime = loanTime * 12;
+      }
+      console.log(calcType, loanMoney, loanTime, unit, yearRate, monthRate);
+      // 等额本息
+      if (calcType === '1') {
+        $('.benjin').show()
+        console.log(11111111)
+
+        // 每月等额还本付息额
+        var hasMoney = loanMoney * (monthRate * Math.pow((1 + monthRate), loanTime) / (Math.pow((1 + monthRate), loanTime) - 1));
+        $('.month-repay').text(hasMoney.toFixed(2));
+        $('.year-repay').text((hasMoney * 12).toFixed(2));
+        // 总利息
+        var totalInterest = loanTime * hasMoney - loanMoney;
+        $('.interest').text(totalInterest.toFixed(2));
+        // 总还款额
+        $('.total').text((loanMoney + totalInterest).toFixed(2));
+
+
+        var meanSum = 0;  // 已归还本金累计 
+        var InterestSum = 0;  //已还利息
+        for (var i = 0; i < loanTime; i++) {
+          // 本月本金
+          var monthMean = loanMoney * monthRate * ((Math.pow((1 + monthRate), (i + 1) - 1)) / (Math.pow((1 + monthRate), loanTime) - 1));
+          // 已还本金
+          meanSum += monthMean;
+          // 本月利息
+          // 每月应还利息 = 贷款本金×月利率×〔(1 + 月利率) ^ 还款月数 - (1 + 月利率) ^ (还款月序号 - 1) 〕÷〔(1 + 月利率) ^ 还款月数 - 1〕
+          var monthInterest = loanMoney * monthRate * ((Math.pow((1 + monthRate), loanTime)) - (Math.pow((1 + monthRate), ((i + 1) - 1)))) / (Math.pow((1 + monthRate), loanTime) - 1);
+          InterestSum += monthInterest;
+          var html
+          html += '<tr><td>' + (i + 1) +
+            '</td><td>' + hasMoney.toFixed(2) +
+            '</td><td>' + monthMean.toFixed(2) +
+            '</td><td>' + monthInterest.toFixed(2) +
+            '</td><td>' + meanSum.toFixed(2) +
+            '</td><td>' + monthInterest.toFixed(2) +
+            '</td><td>' + ((i + 1) * hasMoney).toFixed(2) +
+            '</td><td>' + (loanMoney - meanSum).toFixed(2) +
+            '</td><td>' + ((loanMoney + totalInterest) - ((i + 1) * hasMoney)).toFixed(2) + '</td></tr>'
+        }
+        $('#calc-tbody').html(html);
+      }
+
+
+      // 等额本金
+      if (calcType === '2') {
+        $('.benjin').hide();
+        // 总还款额
+        var total = loanTime * (loanMoney * monthRate - monthRate * (loanMoney / loanTime) * (loanTime - 1) / 2 + loanMoney / loanTime);
+        $('.total').text(total.toFixed(2));
+        $('.interest').text((total - loanMoney).toFixed(2));
+
+
+
+        var hasMoney = 0;// 已归还本金+利息累计额
+        var meanSum = 0;  // 已归还本金累计 
+        var InterestSum = 0;  //已还利息
+        console.log(loanTime)
+        for (var i = 0; i < loanTime; i++) {
+          // 本月利息
+          var monthInterest = (loanMoney - meanSum) * monthRate;
+          // 本月本金
+          var monthMean = (loanMoney / loanTime);
+          meanSum = monthMean * (i + 1);
+          // 本月还款
+          var monthRepay = monthMean + monthInterest;
+          hasMoney += monthRepay;
+          var surplus = loanMoney - meanSum;// 剩余本金
+
+          // 已还利息
+          InterestSum += monthInterest;
+
+          // 总余额
+          var monthTotal = total - hasMoney;
+          var html
+          html += '<tr><td>' + (i + 1) + '</td><td>' + monthRepay.toFixed(2) + '</td><td>' + monthMean.toFixed(2) + '</td><td>' + monthInterest.toFixed(2) + '</td><td>' + meanSum.toFixed(2) + '</td><td>' + InterestSum.toFixed(2) + '</td><td>' + hasMoney.toFixed(2) + '</td><td>' + (loanMoney - meanSum).toFixed(2) + '</td><td>' + monthTotal.toFixed(2) + '</td></tr>'
+          // $('#calc-tbody').append(
+          // '<tr><td>' + (i+1) + '</td><td>' + monthRepay.toFixed(2) + '</td><td>' + monthMean.toFixed(2) + '</td><td>' + monthInterest.toFixed(2) + '</td><td>' + meanSum.toFixed(2) + '</td><td>' + InterestSum.toFixed(2) + '</td><td>' +  hasMoney.toFixed(2) + '</td><td>' + (loanMoney - meanSum).toFixed(2) + '</td><td>' + monthTotal.toFixed(2) + '</td></tr>'
+          // );
+        }
+        $('#calc-tbody').html(html);
+      }
+
+    })
+
+    $('#reset-btn').on('click', function () {
+
+      $('input[name=loanMoney]').val('')
+      $('input[name=loanTime]').val('');
+      $('input[name=yearRate]').val('');
+      $('input[name=monthRate]').val('')
+
+      $('#calc-tbody').html('');
+
+      $('.month-repay').text('');
+      $('.year-repay').text('');
+      $('.interest').text('');
+      $('.total').text('');
+    })
+  </script>
+</body>
+
+</html>
